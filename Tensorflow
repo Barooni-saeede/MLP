@@ -1,0 +1,58 @@
+#  1- import packages
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import tensorflow as tf
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Flatten
+from tensorflow.keras.layers import Activation
+
+from sklearn.datasets import fetch_california_housing
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+#  2- loud dataset
+
+housing = fetch_california_housing() 
+
+#  3- seperate train and test
+
+x_train_full, x_test, y_train_full, y_test = train_test_split(housing.data, housing.target) 
+x_train, x_valid, y_train, y_valid = train_test_split(x_train_full, y_train_full)
+
+#  3/1- Standardization
+
+scaler = StandardScaler()
+x_train = scaler.fit_transform(x_train)
+x_valid = scaler.transform(x_valid)
+x_test = scaler.transform(x_test)
+
+#  4- make a model
+
+from keras.api._v2.keras import activations
+model= Sequential([
+                   Dense(16,activation='relu',input_shape=x_train.shape[1:]),
+                   Dense(8,activation='relu'),
+                   Dense(1)])
+
+#  5- compile the model
+
+model.compile(loss="mean_squared_error", optimizer="sgd")
+
+#  6- fit the model
+
+history = model.fit(x_train, y_train, epochs=20, validation_data=(x_valid, y_valid))
+
+#  7- test the model
+
+se_test = model.evaluate(x_test, y_test)
+
+# Plot
+
+pd.DataFrame(history.history).plot(figsize=(8, 5))
+plt.grid(True)
+plt.gca().set_ylim(0, 1) # set the vertical range to [0-1]
+plt.show()
